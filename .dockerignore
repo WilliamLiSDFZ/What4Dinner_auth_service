@@ -1,0 +1,15 @@
+target/
+.git/
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.sts4-cache
+HELP.md
+CLAUDE.md
