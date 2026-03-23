@@ -19,12 +19,12 @@ import java.util.Map;
 @Component
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final MysqlRepository mysqlRepository;
+    private final UserInfoService userInfoService;
 
     private final JWTService jWTService;
 
-    public OAuthSuccessHandler(MysqlRepository mysqlRepository, JWTService jWTService) {
-        this.mysqlRepository = mysqlRepository;
+    public OAuthSuccessHandler(UserInfoService userInfoService, JWTService jWTService) {
+        this.userInfoService = userInfoService;
         this.jWTService = jWTService;
     }
 
@@ -35,7 +35,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         OidcUser oidcUser = (OidcUser) principal;
         String email = oidcUser.getEmail();
         String username = oidcUser.getName();
-        mysqlRepository.insertUser(email, username, null);
+        userInfoService.authenticateByGoogle(email, username);
         String jwtToken = jWTService.generateToken(oidcUser.getName(), oidcUser.getEmail());
         response.addHeader("Authorization", "Bearer " + jwtToken);
         response.addHeader("Access-Control-Expose-Headers", "Authorization");
