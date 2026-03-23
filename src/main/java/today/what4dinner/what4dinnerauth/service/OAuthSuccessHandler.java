@@ -39,7 +39,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String username = oidcUser.getName();
         userInfoService.authenticateByGoogle(email, username);
         String jwtToken = jWTService.generateShortTermToken(oidcUser.getName(), oidcUser.getEmail());
-        response.sendRedirect("https://auth.what4dinner.today/callback?code="+ URLEncoder.encode(jwtToken, StandardCharsets.UTF_8));
+        response.sendRedirect("https://dash.what4dinner.today/callback?code="+ URLEncoder.encode(jwtToken, StandardCharsets.UTF_8));
     }
 
 }
