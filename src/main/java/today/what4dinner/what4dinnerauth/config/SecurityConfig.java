@@ -29,7 +29,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/health", "/v1/email-login", "/v1/email-register", "/api/v1/exchange-code").permitAll()
+                        .requestMatchers("/health", "/v1/email-login", "/v1/email-register", "/v1/exchange-code").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
