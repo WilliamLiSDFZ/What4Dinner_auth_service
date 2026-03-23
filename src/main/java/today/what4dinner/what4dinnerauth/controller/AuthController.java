@@ -1,10 +1,7 @@
 package today.what4dinner.what4dinnerauth.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import today.what4dinner.what4dinnerauth.dto.UserInfo;
 import today.what4dinner.what4dinnerauth.service.JWTService;
 import today.what4dinner.what4dinnerauth.service.UserInfoService;
@@ -61,5 +58,12 @@ public class AuthController {
                     "error", e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/exchange-code")
+    public ResponseEntity<Map<String, Object>> exchangeJwtToken(
+            @RequestParam("code") String code){
+
+        return ResponseEntity.ok().body(null);
     }
 }

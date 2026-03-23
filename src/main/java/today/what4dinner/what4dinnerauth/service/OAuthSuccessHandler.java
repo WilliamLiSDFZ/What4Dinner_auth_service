@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import today.what4dinner.what4dinnerauth.repository.MysqlRepository;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Component
@@ -37,9 +39,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String username = oidcUser.getName();
         userInfoService.authenticateByGoogle(email, username);
         String jwtToken = jWTService.generateToken(oidcUser.getName(), oidcUser.getEmail());
-        response.addHeader("Authorization", "Bearer " + jwtToken);
-        response.addHeader("Access-Control-Expose-Headers", "Authorization");
-        response.sendRedirect("https://dash.what4dinner.today/");
+        response.sendRedirect("https://auth.what4dinner.today/callback?code="+ URLEncoder.encode(jwtToken, StandardCharsets.UTF_8));
     }
 
 }
