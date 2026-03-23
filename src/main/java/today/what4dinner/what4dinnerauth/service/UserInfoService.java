@@ -1,5 +1,6 @@
 package today.what4dinner.what4dinnerauth.service;
 
+import org.apache.catalina.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import today.what4dinner.what4dinnerauth.dto.UserInfo;
@@ -25,6 +26,15 @@ public class UserInfoService {
             return userOpt;
         }
         return Optional.empty();
+    }
+
+    public Optional<UserInfo> authenticateByGoogle(String email, String username) {
+        Optional<UserInfo> userOpt = mysqlRepository.findUserByEmail(email);
+        if (userOpt.isPresent()) {
+            return userOpt;
+        }
+        String id = mysqlRepository.insertUser(email, username, null);
+        return Optional.of(new UserInfo(id, email, username, null, false));
     }
 
     public UserInfo register(String email, String username, String rawPassword) {
