@@ -37,4 +37,4 @@ src/main/resources/keys/
 
 CLAUDE.md
 
-/src/main/resources/application.yaml
+src/main/resources/application.yaml
