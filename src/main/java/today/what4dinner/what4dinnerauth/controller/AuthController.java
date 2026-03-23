@@ -63,7 +63,12 @@ public class AuthController {
     @GetMapping("/exchange-code")
     public ResponseEntity<Map<String, Object>> exchangeJwtToken(
             @RequestParam("code") String code){
-
-        return ResponseEntity.ok().body(null);
+        Optional<String> newToken = jwtService.exchangeToken(code);
+        if (newToken.isEmpty()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid code"));
+        }
+        return ResponseEntity.ok().body(
+                Map.of("token", newToken.orElse(""))
+        );
     }
 }

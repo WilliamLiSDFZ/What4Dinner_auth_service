@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class JWTService {
@@ -48,11 +49,11 @@ public class JWTService {
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    public String exchnageToken(String token) {
+    public Optional<String> exchangeToken(String token) {
         Jwt jwt = jwtDecoder.decode(token);
         Map<String, Object> claims = jwt.getClaims();
         String userId = (String) claims.get("sub");
         String email = (String) claims.get("email");
-        return generateToken(userId, email);
+        return Optional.of(generateToken(userId, email));
     }
 }
