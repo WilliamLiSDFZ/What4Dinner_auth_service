@@ -4,6 +4,9 @@ import today.what4dinner.what4dinnerauth.dto.UserInfo;
 
 import java.util.Optional;
 
+/**
+ * Repository for user data persistence in MySQL.
+ */
 public interface MysqlRepository {
 
     /**

@@ -1,48 +1,42 @@
 package today.what4dinner.what4dinnerauth.service;
 
-import org.apache.catalina.User;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import today.what4dinner.what4dinnerauth.dto.UserInfo;
-import today.what4dinner.what4dinnerauth.repository.MysqlRepository;
 
 import java.util.Optional;
 
-@Service
-public class UserInfoService {
+/**
+ * Service for user authentication and registration.
+ */
+public interface UserInfoService {
 
-    private final MysqlRepository mysqlRepository;
+    /**
+     * Authenticates a user by verifying the provided email and password.
+     *
+     * @param email       the email address of the user
+     * @param rawPassword the plain-text password to verify
+     * @return an {@link Optional} containing the {@link UserInfo} if credentials are valid,
+     *         or empty if authentication fails
+     */
+    Optional<UserInfo> authenticate(String email, String rawPassword);
 
-    private final PasswordEncoder passwordEncoder;
+    /**
+     * Authenticates a user via Google OAuth2. If no account exists for the given email,
+     * a new user is created automatically.
+     *
+     * @param email    the email address from the Google profile
+     * @param username the display name from the Google profile
+     * @return an {@link Optional} containing the existing or newly created {@link UserInfo}
+     */
+    Optional<UserInfo> authenticateByGoogle(String email, String username);
 
-    public UserInfoService(MysqlRepository mysqlRepository, PasswordEncoder passwordEncoder) {
-        this.mysqlRepository = mysqlRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    public Optional<UserInfo> authenticate(String email, String rawPassword) {
-        Optional<UserInfo> userOpt = mysqlRepository.findUserByEmail(email);
-        if (userOpt.isPresent() && passwordEncoder.matches(rawPassword, userOpt.get().getPasswordHash())) {
-            return userOpt;
-        }
-        return Optional.empty();
-    }
-
-    public Optional<UserInfo> authenticateByGoogle(String email, String username) {
-        Optional<UserInfo> userOpt = mysqlRepository.findUserByEmail(email);
-        if (userOpt.isPresent()) {
-            return userOpt;
-        }
-        String id = mysqlRepository.insertUser(email, username, null);
-        return Optional.of(new UserInfo(id, email, username, null, false));
-    }
-
-    public UserInfo register(String email, String username, String rawPassword) {
-        if (mysqlRepository.findUserByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("Email already registered");
-        }
-        String hash = passwordEncoder.encode(rawPassword);
-        String id = mysqlRepository.insertUser(email, username, hash);
-        return new UserInfo(id, email, username, hash, false);
-    }
+    /**
+     * Registers a new user with email and password credentials.
+     *
+     * @param email       the email address for the new account
+     * @param username    the display name for the new account
+     * @param rawPassword the plain-text password (will be hashed before storage)
+     * @return the newly created {@link UserInfo}
+     * @throws IllegalArgumentException if the email is already registered
+     */
+    UserInfo register(String email, String username, String rawPassword);
 }

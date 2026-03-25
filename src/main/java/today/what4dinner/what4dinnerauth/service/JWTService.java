@@ -1,59 +1,36 @@
 package today.what4dinner.what4dinnerauth.service;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jwt.*;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Map;
 import java.util.Optional;
 
-@Service
-public class JWTService {
+/**
+ * Service for generating and validating JSON Web Tokens (JWT) used for authentication.
+ */
+public interface JWTService {
 
-    private final JwtEncoder jwtEncoder;
+    /**
+     * Generates a JWT with the configured default expiration.
+     *
+     * @param userId the unique identifier of the user (stored as the {@code sub} claim)
+     * @param email  the email address of the user (stored as the {@code email} claim)
+     * @return the encoded JWT string
+     */
+    String generateToken(String userId, String email);
 
-    private final JwtDecoder jwtDecoder;
+    /**
+     * Generates a short-lived JWT with a 15-minute expiration, typically used as an
+     * OAuth2 redirect code that is exchanged for a full-duration token.
+     *
+     * @param userId the unique identifier of the user (stored as the {@code sub} claim)
+     * @param email  the email address of the user (stored as the {@code email} claim)
+     * @return the encoded JWT string
+     */
+    String generateShortTermToken(String userId, String email);
 
-    private final long expirationMinutes;
-
-    public JWTService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, @Value("${jwt.expiration-minutes}") long expirationMinutes) {
-        this.jwtEncoder = jwtEncoder;
-        this.jwtDecoder = jwtDecoder;
-        this.expirationMinutes = expirationMinutes;
-    }
-
-    public String generateToken(String userId, String email) {
-        Instant now = Instant.now();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("what4dinner-auth")
-                .subject(userId)
-                .claim("email", email)
-                .issuedAt(now)
-                .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
-                .build();
-
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-    }
-
-    public String generateShortTermToken(String userId, String email) {
-        Instant now = Instant.now();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("what4dinner-auth")
-                .subject(userId)
-                .claim("email", email)
-                .issuedAt(now)
-                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
-                .build();
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-    }
-
-    public Optional<String> exchangeToken(String token) {
-        Jwt jwt = jwtDecoder.decode(token);
-        Map<String, Object> claims = jwt.getClaims();
-        String userId = (String) claims.get("sub");
-        String email = (String) claims.get("email");
-        return Optional.of(generateToken(userId, email));
-    }
+    /**
+     * Validates the given token and issues a new full-duration token with the same claims.
+     *
+     * @param token the JWT string to validate and exchange
+     * @return an {@link Optional} containing the new token, or empty if validation fails
+     */
+    Optional<String> exchangeToken(String token);
 }
