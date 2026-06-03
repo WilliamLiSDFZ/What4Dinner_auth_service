@@ -3,24 +3,24 @@ package today.what4dinner.what4dinnerauth.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import today.what4dinner.what4dinnerauth.dto.UserInfo;
-import today.what4dinner.what4dinnerauth.repository.MysqlRepository;
+import today.what4dinner.what4dinnerauth.repository.UserRepository;
 
 import java.util.Optional;
 
 @Service
 public class UserInfoServiceImpl implements UserInfoService {
 
-    private final MysqlRepository mysqlRepository;
+    private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
-    public UserInfoServiceImpl(MysqlRepository mysqlRepository, PasswordEncoder passwordEncoder) {
-        this.mysqlRepository = mysqlRepository;
+    public UserInfoServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public Optional<UserInfo> authenticate(String email, String rawPassword) {
-        Optional<UserInfo> userOpt = mysqlRepository.findUserByEmail(email);
+        Optional<UserInfo> userOpt = userRepository.findUserByEmail(email);
         if (userOpt.isPresent() && passwordEncoder.matches(rawPassword, userOpt.get().getPasswordHash())) {
             return userOpt;
         }
@@ -28,20 +28,20 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     public Optional<UserInfo> authenticateByGoogle(String email, String username) {
-        Optional<UserInfo> userOpt = mysqlRepository.findUserByEmail(email);
+        Optional<UserInfo> userOpt = userRepository.findUserByEmail(email);
         if (userOpt.isPresent()) {
             return userOpt;
         }
-        String id = mysqlRepository.insertUser(email, username, null);
+        String id = userRepository.insertUser(email, username, null);
         return Optional.of(new UserInfo(id, email, username, null, false));
     }
 
     public UserInfo register(String email, String username, String rawPassword) {
-        if (mysqlRepository.findUserByEmail(email).isPresent()) {
+        if (userRepository.findUserByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already registered");
         }
         String hash = passwordEncoder.encode(rawPassword);
-        String id = mysqlRepository.insertUser(email, username, hash);
+        String id = userRepository.insertUser(email, username, hash);
         return new UserInfo(id, email, username, hash, false);
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import today.what4dinner.what4dinnerauth.repository.MysqlRepository;
 
 import java.io.IOException;
 import java.net.URLEncoder;

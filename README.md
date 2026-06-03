@@ -6,7 +6,7 @@ Authentication microservice for the [What4Dinner](https://what4dinner.today) pla
 
 - Java 21 / Spring Boot 4.0.3
 - Spring Security (JWT + Google OAuth2)
-- MySQL (JDBC)
+- PostgreSQL (JDBC)
 - Docker
 
 ## Getting Started
@@ -14,7 +14,7 @@ Authentication microservice for the [What4Dinner](https://what4dinner.today) pla
 ### Prerequisites
 
 - Java 21
-- MySQL database
+- PostgreSQL database
 - Google OAuth2 credentials (from [Google Cloud Console](https://console.cloud.google.com/apis/credentials))
 
 ### Setup
@@ -33,7 +33,7 @@ openssl rsa -in src/main/resources/keys/private.pem -pubout -out src/main/resour
 cp src/main/resources/application-example.yaml src/main/resources/application.yaml
 ```
 
-Then fill in your Google OAuth2 credentials and MySQL connection details.
+Then fill in your Google OAuth2 credentials and PostgreSQL connection details.
 
 3. **Run**:
 
@@ -63,7 +63,7 @@ Set environment variables before running:
 
 | Variable | Description |
 |---|---|
-| `SPRING_DATASOURCE_URL` | MySQL JDBC URL |
+| `SPRING_DATASOURCE_URL` | PostgreSQL JDBC URL |
 | `SPRING_DATASOURCE_USERNAME` | Database username |
 | `SPRING_DATASOURCE_PASSWORD` | Database password |
 | `GOOGLE_CLIENT_ID` | Google OAuth2 client ID |

@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import today.what4dinner.what4dinnerauth.dto.UserInfo;
+import today.what4dinner.what4dinnerauth.util.Uuids;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public class MysqlRepositoryImpl implements MysqlRepository {
+public class UserRepositoryImpl implements UserRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -29,7 +30,7 @@ public class MysqlRepositoryImpl implements MysqlRepository {
         }
     };
 
-    public MysqlRepositoryImpl(JdbcTemplate jdbcTemplate) {
+    public UserRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -45,11 +46,11 @@ public class MysqlRepositoryImpl implements MysqlRepository {
 
     @Override
     public String insertUser(String email, String username, String passwordHash) {
-        String id = UUID.randomUUID().toString();
+        UUID id = Uuids.v7();
         jdbcTemplate.update(
                 "INSERT INTO users (id, email, username, password_hash) VALUES (?, ?, ?, ?)",
                 id, email, username, passwordHash
         );
-        return id;
+        return id.toString();
     }
 }
