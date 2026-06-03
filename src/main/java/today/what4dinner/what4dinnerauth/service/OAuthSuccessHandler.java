@@ -4,18 +4,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import today.what4dinner.what4dinnerauth.dto.UserInfo;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @Component
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
@@ -32,12 +29,14 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2AuthenticationToken auth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
-        OAuth2User principal = auth2AuthenticationToken.getPrincipal();
-        OidcUser oidcUser = (OidcUser) principal;
+        OidcUser oidcUser = (OidcUser) auth2AuthenticationToken.getPrincipal();
         String email = oidcUser.getEmail();
-        String username = oidcUser.getName();
-        userInfoService.authenticateByGoogle(email, username);
-        String jwtToken = jWTService.generateShortTermToken(oidcUser.getName(), oidcUser.getEmail());
+        String username = oidcUser.getFullName();
+        // Resolve (or create) our own user record; the returned UserInfo carries our UUID,
+        // not Google's `sub`, so the JWT subject identifies the user in our own system.
+        UserInfo user = userInfoService.authenticateByGoogle(email, username)
+                .orElseThrow(() -> new IllegalStateException("Failed to resolve user for email " + email));
+        String jwtToken = jWTService.generateShortTermToken(user.getId(), user.getEmail());
         response.sendRedirect("https://dash.what4dinner.today/callback?code="+ URLEncoder.encode(jwtToken, StandardCharsets.UTF_8));
     }
 

@@ -106,27 +106,69 @@ localStorage.setItem('token', data.token);
 
 ### 3. Google OAuth2 Login
 
-This uses Spring's server-side OAuth2 flow. The frontend does **not** call an API — it navigates the browser directly.
+This uses Spring's server-side OAuth2 flow. Because OAuth success is a browser redirect (it has no
+response body), the token is delivered in **two steps**: the server hands the browser a short-lived
+`code`, and the frontend exchanges that `code` for the real token.
 
-**Step 1 — Redirect the user to:**
+**Step 1 — Start the flow.** Navigate the browser (full-page redirect, not an AJAX call) to:
 
 ```
 GET /api/oauth2/authorization/google
 ```
 
-This redirects to Google's consent screen. After the user authorizes, Google calls back to the server.
+This redirects to Google's consent screen. After the user authorizes, Google calls back to the server,
+which upserts the user (creating an account with no password if they're new).
 
-**Step 2 — After successful authentication:**
-
-The server redirects the browser to `https://dash.what4dinner.today/` with the JWT in the `Authorization` response header.
-
-> **Note:** Since this is an HTTP redirect (302), the `Authorization` header may not be accessible to frontend JavaScript. If you need to capture the token, coordinate with the backend to pass it as a URL query parameter instead (e.g., `?token=...`).
-
-**Example (triggering the flow):**
 ```javascript
-// Simply navigate — this is a full-page redirect, not an AJAX call
-window.location.href = '/api/oauth2/authorization/google';
+window.location.href = 'https://auth.what4dinner.today/api/oauth2/authorization/google';
 ```
+
+**Step 2 — Receive the `code`.** The server redirects the browser to:
+
+```
+https://dash.what4dinner.today/callback?code=<code>
+```
+
+`code` is a **short-lived (15-minute) JWT**. It rides in the URL only as a one-time handoff value, so it
+is deliberately disposable — do not store it or use it as the API token.
+
+**Step 3 — Exchange the `code` for the real token.** On the `/callback` page, read `code` from the query
+string and call:
+
+```
+GET /api/v1/exchange-code?code=<code>
+```
+
+**Success (200):**
+```json
+{
+  "token": "eyJhbGciOiJSUzI1NiJ9..."
+}
+```
+
+**Error — invalid/expired code (401):**
+```json
+{
+  "error": "Invalid code"
+}
+```
+
+The returned `token` is the usable **60-minute JWT** — store it and send it as `Authorization: Bearer`
+on subsequent requests (see [Using the JWT Token](#using-the-jwt-token)).
+
+```javascript
+// On https://dash.what4dinner.today/callback
+const code = new URLSearchParams(window.location.search).get('code');
+const res = await fetch(
+  `https://auth.what4dinner.today/api/v1/exchange-code?code=${encodeURIComponent(code)}`
+);
+const { token } = await res.json();
+localStorage.setItem('token', token);
+// then redirect into the app
+```
+
+> **Note:** No `Authorization` header is sent on `/exchange-code` — the `code` query parameter *is* the
+> credential. Call this endpoint once, immediately after the OAuth callback.
 
 ---
 
