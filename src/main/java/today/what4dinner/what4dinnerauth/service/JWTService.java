@@ -4,6 +4,13 @@ import java.util.Optional;
 
 /**
  * Service for generating and validating JSON Web Tokens (JWT) used for authentication.
+ *
+ * <p>Tokens carry identity only — {@code sub}, {@code email}, {@code iss}. A user's
+ * {@code family_id} is deliberately <strong>not</strong> a claim: family membership can change,
+ * and a token is valid for 60 minutes with no way to revoke it, so a baked-in family id would
+ * let a user keep reading and writing the family they just left for the rest of that hour.
+ * Consumers read the current family from {@code users.family_id} instead — a primary-key lookup
+ * on the shared database — or from {@code GET /v1/me}.
  */
 public interface JWTService {
 

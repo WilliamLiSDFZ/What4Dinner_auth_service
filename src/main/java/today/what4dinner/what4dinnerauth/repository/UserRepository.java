@@ -19,12 +19,23 @@ public interface UserRepository {
     Optional<UserInfo> findUserByEmail(String email);
 
     /**
-     * Inserts a new user record into the database with the provided email, username, and hashed password.
+     * Retrieves a user from the database based on the provided id.
+     *
+     * @param id the unique identifier of the user to retrieve
+     * @return an Optional containing the UserInfo if a user with the specified id exists,
+     *         or an empty Optional if no such user is found or the id is not a valid UUID
+     */
+    Optional<UserInfo> findUserById(String id);
+
+    /**
+     * Inserts a new user record into the database with the provided email, username, hashed
+     * password and owning family.
      *
      * @param email the email address of the user to be added
      * @param username the username of the user to be added
      * @param passwordHash the hashed password of the user to be added
+     * @param familyId the ID of the family the user belongs to
      * @return the unique identifier (ID) of the newly inserted user
      */
-    String insertUser(String email, String username, String passwordHash);
+    String insertUser(String email, String username, String passwordHash, String familyId);
 }

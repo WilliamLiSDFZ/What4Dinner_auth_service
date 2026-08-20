@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -25,35 +24,30 @@ public class JWTServiceImpl implements JWTService {
     }
 
     public String generateToken(String userId, String email) {
-        Instant now = Instant.now();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("what4dinner-auth")
-                .subject(userId)
-                .claim("email", email)
-                .issuedAt(now)
-                .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
-                .build();
-
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return encode(userId, email, expirationMinutes);
     }
 
     public String generateShortTermToken(String userId, String email) {
-        Instant now = Instant.now();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("what4dinner-auth")
-                .subject(userId)
-                .claim("email", email)
-                .issuedAt(now)
-                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
-                .build();
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return encode(userId, email, 15);
     }
 
     public Optional<String> exchangeToken(String token) {
         Jwt jwt = jwtDecoder.decode(token);
-        Map<String, Object> claims = jwt.getClaims();
-        String userId = (String) claims.get("sub");
-        String email = (String) claims.get("email");
-        return Optional.of(generateToken(userId, email));
+        return Optional.of(generateToken(jwt.getSubject(), jwt.getClaimAsString("email")));
+    }
+
+    private String encode(String userId, String email, long ttlMinutes) {
+        Instant now = Instant.now();
+        JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
+                .issuer("what4dinner-auth")
+                .subject(userId)
+                .issuedAt(now)
+                .expiresAt(now.plus(ttlMinutes, ChronoUnit.MINUTES));
+        // JwtClaimsSet.Builder.claim() asserts the value is non-null, so an optional claim has
+        // to be guarded rather than passed straight through.
+        if (email != null) {
+            claims.claim("email", email);
+        }
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims.build())).getTokenValue();
     }
 }

@@ -25,7 +25,8 @@ public class UserRepositoryImpl implements UserRepository {
                     rs.getString("email"),
                     rs.getString("username"),
                     rs.getString("password_hash"),
-                    rs.getBoolean("activated")
+                    rs.getBoolean("activated"),
+                    rs.getString("family_id")
             );
         }
     };
@@ -37,7 +38,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<UserInfo> findUserByEmail(String email) {
         List<UserInfo> results = jdbcTemplate.query(
-                "SELECT id, email, username, password_hash, activated FROM users WHERE email = ?",
+                "SELECT id, email, username, password_hash, activated, family_id FROM users WHERE email = ?",
                 userInfoRowMapper,
                 email
         );
@@ -45,11 +46,31 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public String insertUser(String email, String username, String passwordHash) {
+    public Optional<UserInfo> findUserById(String id) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            // A `sub` that isn't a UUID cannot match any row, and binding it would make
+            // Postgres reject the whole statement rather than simply return nothing.
+            return Optional.empty();
+        }
+        List<UserInfo> results = jdbcTemplate.query(
+                "SELECT id, email, username, password_hash, activated, family_id FROM users WHERE id = ?",
+                userInfoRowMapper,
+                uuid
+        );
+        return results.stream().findFirst();
+    }
+
+    @Override
+    public String insertUser(String email, String username, String passwordHash, String familyId) {
         UUID id = Uuids.v7();
+        // Both ids are bound as UUID objects, not Strings, so PgJDBC maps them to the native
+        // uuid columns instead of trying a varchar -> uuid cast that Postgres rejects.
         jdbcTemplate.update(
-                "INSERT INTO users (id, email, username, password_hash) VALUES (?, ?, ?, ?)",
-                id, email, username, passwordHash
+                "INSERT INTO users (id, family_id, email, username, password_hash) VALUES (?, ?, ?, ?, ?)",
+                id, UUID.fromString(familyId), email, username, passwordHash
         );
         return id.toString();
     }

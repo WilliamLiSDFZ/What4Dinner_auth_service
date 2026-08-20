@@ -31,10 +31,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2AuthenticationToken auth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
         OidcUser oidcUser = (OidcUser) auth2AuthenticationToken.getPrincipal();
         String email = oidcUser.getEmail();
-        String username = oidcUser.getFullName();
         // Resolve (or create) our own user record; the returned UserInfo carries our UUID,
         // not Google's `sub`, so the JWT subject identifies the user in our own system.
-        UserInfo user = userInfoService.authenticateByGoogle(email, username)
+        UserInfo user = userInfoService.authenticateByGoogle(email)
                 .orElseThrow(() -> new IllegalStateException("Failed to resolve user for email " + email));
         String jwtToken = jWTService.generateShortTermToken(user.getId(), user.getEmail());
         response.sendRedirect("https://dash.what4dinner.today/callback?code="+ URLEncoder.encode(jwtToken, StandardCharsets.UTF_8));
