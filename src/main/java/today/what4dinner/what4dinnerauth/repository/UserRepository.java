@@ -19,15 +19,6 @@ public interface UserRepository {
     Optional<UserInfo> findUserByEmail(String email);
 
     /**
-     * Retrieves a user from the database based on the provided id.
-     *
-     * @param id the unique identifier of the user to retrieve
-     * @return an Optional containing the UserInfo if a user with the specified id exists,
-     *         or an empty Optional if no such user is found or the id is not a valid UUID
-     */
-    Optional<UserInfo> findUserById(String id);
-
-    /**
      * Inserts a new user record into the database with the provided email, username, hashed
      * password and owning family.
      *

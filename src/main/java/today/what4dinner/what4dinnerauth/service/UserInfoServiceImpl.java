@@ -47,10 +47,6 @@ public class UserInfoServiceImpl implements UserInfoService {
         return Optional.of(new UserInfo(id, email, username, null, false, familyId));
     }
 
-    public Optional<UserInfo> findById(String userId) {
-        return userRepository.findUserById(userId);
-    }
-
     @Transactional
     public UserInfo register(String email, String username, String rawPassword) {
         if (userRepository.findUserByEmail(email).isPresent()) {

@@ -1,14 +1,11 @@
 package today.what4dinner.what4dinnerauth.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import today.what4dinner.what4dinnerauth.dto.UserInfo;
 import today.what4dinner.what4dinnerauth.service.JWTService;
 import today.what4dinner.what4dinnerauth.service.UserInfoService;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,28 +58,6 @@ public class AuthController {
                     "error", e.getMessage()
             ));
         }
-    }
-
-    /**
-     * Returns the caller's current profile, read fresh from the database on every call.
-     * This is how clients get {@code familyId}: it is deliberately not a JWT claim, because
-     * family membership can change while a 60-minute token is still valid and there is no way
-     * to revoke an already-issued token.
-     */
-    @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> me(@AuthenticationPrincipal Jwt jwt) {
-        Optional<UserInfo> userOpt = userInfoService.findById(jwt.getSubject());
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
-        }
-        UserInfo user = userOpt.get();
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("userId", user.getId());
-        body.put("email", user.getEmail());
-        body.put("username", user.getUsername());
-        // Nullable in principle, and Map.of() rejects null values — hence LinkedHashMap.
-        body.put("familyId", user.getFamilyId());
-        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/exchange-code")

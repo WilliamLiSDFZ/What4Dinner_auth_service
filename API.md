@@ -17,8 +17,8 @@ The JWT is valid for 60 minutes and contains:
 
 The token carries **identity only**. It deliberately does not contain `family_id`: a user's family
 can change, tokens live for 60 minutes and cannot be revoked, so a family id baked into the token
-would keep granting access to the family the user just left. Call `GET /v1/me` for the current
-family instead.
+would keep granting access to the family the user just left. Services that need the caller's family
+read `users.family_id` for the token's `sub` — this auth service does not expose it.
 
 ---
 
@@ -177,39 +177,7 @@ localStorage.setItem('token', token);
 
 ---
 
-### 4. Current User
-
-```
-GET /v1/me
-Authorization: Bearer <token>
-```
-
-Returns the caller's profile, read fresh from the database on every call. This is the way to get
-`familyId` — it is not a JWT claim (see **Authentication** above). Call it after login, and again
-after anything that may have changed the user's family.
-
-**Success (200):**
-```json
-{
-  "userId": "019e8ec8-f581-758d-98c0-1bb53c05db2f",
-  "email": "user@example.com",
-  "username": "user",
-  "familyId": "019e8ed0-1a2b-7c3d-8e4f-5a6b7c8d9e0f"
-}
-```
-
-**Error — no/invalid token (401):** empty body.
-
-**Error — token valid but user row is gone (404):**
-```json
-{
-  "error": "User not found"
-}
-```
-
----
-
-### 5. Health Check
+### 4. Health Check
 
 ```
 GET /health

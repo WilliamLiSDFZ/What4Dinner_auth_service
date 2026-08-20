@@ -30,16 +30,6 @@ public interface UserInfoService {
     Optional<UserInfo> authenticateByGoogle(String email);
 
     /**
-     * Looks up the current state of a user by id. Used to serve profile data — notably
-     * {@code familyId} — that is deliberately kept out of the JWT because it can change while
-     * a token is still valid.
-     *
-     * @param userId the unique identifier of the user, i.e. the token's {@code sub} claim
-     * @return an {@link Optional} containing the user, or empty if no such user exists
-     */
-    Optional<UserInfo> findById(String userId);
-
-    /**
      * Registers a new user with email and password credentials.
      *
      * @param email       the email address for the new account
