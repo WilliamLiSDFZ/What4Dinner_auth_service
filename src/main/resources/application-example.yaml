@@ -29,4 +29,4 @@ spring:
 jwt:
   private-key: classpath:keys/your-private.pem
   public-key: classpath:keys/your-public.pem
-  expiration-minutes: 60
+  expiration-minutes: 720   # 12 hours

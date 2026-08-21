@@ -7,8 +7,8 @@ import java.util.Optional;
  *
  * <p>Tokens carry identity only — {@code sub}, {@code email}, {@code iss}. A user's
  * {@code family_id} is deliberately <strong>not</strong> a claim: family membership can change,
- * and a token is valid for 60 minutes with no way to revoke it, so a baked-in family id would
- * let a user keep reading and writing the family they just left for the rest of that hour.
+ * and a token is valid for 12 hours with no way to revoke it, so a baked-in family id would
+ * let a user keep reading and writing the family they just left for the rest of that window.
  * Consumers read the current family from {@code users.family_id} themselves — a primary-key lookup
  * on the shared database.
  */
