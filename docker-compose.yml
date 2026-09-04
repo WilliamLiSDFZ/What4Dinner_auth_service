@@ -3,6 +3,18 @@ services:
     build: .
     ports:
       - "8081:8081"
+    volumes:
+      # Config and keys live on the host, not in the image. Editing application.yaml
+      # now only needs a `docker compose restart app`, not a full rebuild.
+      - ./src/main/resources/application.yaml:/app/config/application.yaml:ro
+      - ./src/main/resources/keys:/app/config/keys:ro
+    environment:
+      # jwt.private-key/public-key are Spring `Resource`s; the mounted keys are on the
+      # filesystem, not the classpath, so they need the file: prefix. The defaults in
+      # application.yaml keep `./mvnw spring-boot:run` working off the classpath.
+      JWT_PRIVATE_KEY: file:/app/config/keys/private.pem
+      JWT_PUBLIC_KEY: file:/app/config/keys/public.pem
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/api/health"]
       interval: 15s

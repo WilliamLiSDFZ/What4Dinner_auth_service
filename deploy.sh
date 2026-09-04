@@ -80,12 +80,12 @@ start_docker() {
     print_info "启动 Docker 模式..."
     check_docker
 
-    # 停止旧容器并构建新镜像
-    docker compose down 2>/dev/null || true
+    # 先构建，构建失败时旧容器仍在跑，不会造成停机
     build_docker
 
-    # 运行应用容器
+    # 构建成功后才切换容器
     print_info "启动应用容器..."
+    docker compose down 2>/dev/null || true
     docker compose up -d
 
     if [ $? -eq 0 ]; then

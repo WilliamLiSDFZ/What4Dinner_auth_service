@@ -13,3 +13,8 @@ target/
 .sts4-cache
 HELP.md
 CLAUDE.md
+
+# Secrets stay out of the image — mounted at /app/config at runtime instead.
+src/main/resources/application.yaml
+src/main/resources/application.yml
+src/main/resources/keys/
