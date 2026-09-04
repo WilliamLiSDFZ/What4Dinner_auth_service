@@ -1,6 +1,11 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      # The build container has no working DNS of its own on the deploy host
+      # ("Temporary failure in name resolution" reaching repo.maven.apache.org), so it
+      # borrows the host's network namespace, where resolution works.
+      network: host
     ports:
       - "8081:8081"
     volumes:
